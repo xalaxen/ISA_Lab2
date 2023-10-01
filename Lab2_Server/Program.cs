@@ -1,4 +1,5 @@
 ﻿using Lab1;
+using NLog;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -13,6 +14,8 @@ namespace Lab2_Server
 {
     class Program
     {
+        private static Logger logger = LogManager.GetCurrentClassLogger();
+
         public static UdpClient udpServer;
         public string message = "";
         private static string file_path = "students.csv";
@@ -32,21 +35,26 @@ namespace Lab2_Server
                 try
                 {
                     p.ReceiveMessage();
+                    logger.Info("Server got:" + p.message);
                     switch (p.message)
                     {
                         case "1":
                             response = f.PrintAllNotes(ref students);
+                            logger.Info($"Server sent: {response}");
                             p.SendMessage(response + "\n" + p.Menu());
                             break;
                         case "2":
                             p.SendMessage("Enter number:");
                             p.ReceiveMessage();
                             int number_to_print = Int32.Parse(p.message);
+                            logger.Info($"Server got: {number_to_print}");
                             response = f.PrintNotesByNumber(number_to_print, ref students);
+                            logger.Info($"Server sent: {response}");
                             p.SendMessage(response + "\n" + p.Menu());
                             break;
                         case "3":
                             f.WriteNotesToFile(ref students, file_path);
+                            logger.Debug("Data was saved");
                             p.SendMessage("Data was saved!" + "\n" + p.Menu());
                             break;
                         case "4":
@@ -55,36 +63,53 @@ namespace Lab2_Server
                             try
                             {
                                 int number_to_delete = Int32.Parse(p.message);
+                                logger.Info($"Server got: {number_to_delete}");
                                 f.RemoveNotesFromFile(number_to_delete, ref students);
+                                logger.Debug($"Item with inxex {number_to_delete - 1} deleted");
                                 p.SendMessage("Item was deleted!" + "\n" + p.Menu());
-                            }catch(Exception e) { p.SendMessage(e.Message); }
+                            }
+                            catch(Exception e) 
+                            { 
+                                p.SendMessage(e.Message);
+                                logger.Error(e.StackTrace);
+                            }
                             break;
                         case "5":
                             p.SendMessage("Enter surname:");
                             p.ReceiveMessage();
                             string surname = p.message;
+                            logger.Info($"Server got: {surname}");
 
                             p.SendMessage("Enter name:");
                             p.ReceiveMessage();
                             string name = p.message;
+                            logger.Info($"Server got: {name}");
 
                             p.SendMessage("Enter patronymic:");
                             p.ReceiveMessage();
                             string patronymic = p.message;
+                            logger.Info($"Server got: {patronymic}");
 
                             p.SendMessage("Enter sex:");
                             p.ReceiveMessage();
                             string sex = p.message;
+                            logger.Info($"Server got: {sex}");
 
                             p.SendMessage("Enter age:");
                             p.ReceiveMessage();
                             try
                             {
                                 int age = Int32.Parse(p.message);
+                                logger.Info($"Server got: {age}");
                                 f.AddNoteToFile(surname, name, patronymic, sex, age, ref students);
+                                logger.Debug("New note added");
                                 p.SendMessage("Note added!" + "\n" + p.Menu());
                             }
-                            catch(Exception e) { p.SendMessage("Incorrect input!" + "\n" + p.Menu()); }
+                            catch(Exception e) 
+                            { 
+                                p.SendMessage("Incorrect input!" + "\n" + p.Menu());
+                                logger.Error(e.StackTrace);
+                            }
                             break;
                         default:
                             response = "There is no such item!";
@@ -95,6 +120,7 @@ namespace Lab2_Server
                 catch (Exception ex)
                 {
                     Console.WriteLine(ex.Message);
+                    logger.Error(ex.StackTrace);
                 }
             }
         }

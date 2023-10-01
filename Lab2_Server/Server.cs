@@ -14,12 +14,14 @@ namespace Lab2_Server
     {
         private static ManualResetEvent allDone = new ManualResetEvent(false);
         private UdpClient udpClient_S;
+
         private int port;
+
         private static string file_path = "students.csv";
         static Functions fn = new Functions();
 
         List<Student> students = fn.ReadAllDate(file_path);
-        //tcp
+
         public Server(int _port)
         {
             udpClient_S = new UdpClient(_port);
