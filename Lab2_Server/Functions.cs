@@ -36,7 +36,7 @@ namespace Lab1
             return students;
         }
 
-        public string PrintAllNotes(List<Student> students)
+        public string PrintAllNotes(ref List<Student> students)
         {
             string StudentsList = "";
             for (int i = 0; i < students.Count; i++)
@@ -88,7 +88,7 @@ namespace Lab1
         {
             try
             {
-                students.RemoveAt(note_number);
+                students.RemoveAt(note_number-1);
                 return "";
             }
             catch (Exception e) { return "Записи с таким номром не существует!\n"; }
