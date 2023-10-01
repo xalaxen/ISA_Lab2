@@ -6,12 +6,15 @@ using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 using System.ComponentModel.Design;
+using System.Threading;
 
 namespace Lab2_Client
 {
     class Program
     {
         public static UdpClient udpClient;
+        private static StringBuilder inputBuilder = new StringBuilder();
+
         static void Main(string[] args)
         {
             udpClient = new UdpClient(8002);
@@ -23,17 +26,23 @@ namespace Lab2_Client
             {
                 try
                 {
-                    if(Console.KeyAvailable)
+                    ConsoleKeyInfo key = Console.ReadKey(false);
+
+                    if (key.Key != ConsoleKey.Escape)
                     {
-                        ConsoleKeyInfo keyInfo = Console.ReadKey();
-                        if(keyInfo.Key == ConsoleKey.Escape)
+                        if(key.Key == ConsoleKey.Enter)
                         {
-                            Environment.Exit(0);
+                            p.SendMessage(inputBuilder.ToString());
+                            inputBuilder.Clear();
+                            Console.WriteLine();
+                            p.ReceiveMessage();
+                        }
+                        else
+                        {
+                            inputBuilder.Append(key.KeyChar);
                         }
                     }
-                    p.SendMessage();
-                    Console.WriteLine();
-                    p.ReceiveMessage();
+                    else { break; }
                 }
                 catch (Exception ex)
                 {
@@ -53,11 +62,10 @@ namespace Lab2_Client
                     "Выход из приложения - ESC.\n";
         }
 
-        public void SendMessage()
+        public void SendMessage(string message)
         {
             try
             {
-                string message = Console.ReadLine();
                 byte[] data = Encoding.Unicode.GetBytes(message);
                 udpClient.Send(data, data.Length, "127.0.0.1", 8001);
             }
