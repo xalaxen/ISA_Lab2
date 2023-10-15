@@ -8,11 +8,15 @@ namespace Lab1
 {
     public class Student
     {
+        public int Id {get; set;}
+
         private string surname;
         private string name;
         private string patronymic;
         private bool sex;
         private int age;
+
+        public Student() { }
 
         public Student(string nsurname, string nname, string npatronymic, bool nsex, int nage)
         {

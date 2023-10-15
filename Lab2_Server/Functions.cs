@@ -5,11 +5,14 @@ using System.Text;
 using System.Threading.Tasks;
 using System.IO;
 using System.Collections.ObjectModel;
+using Lab2_Server;
+using System.Data.Entity;
 
 namespace Lab1
 {
     public class Functions
     {
+        // не нужный метод, тк даныне перешли в базу данных
         public List<Student> ReadAllDate(string path)
         {
             List<Student> students = new List<Student>();
@@ -36,15 +39,15 @@ namespace Lab1
             return students;
         }
 
-        public string PrintAllNotes(ref List<Student> students)
+        public string PrintAllNotes(ref DbSet<Student> students)
         {
             string StudentsList = "";
-            for (int i = 0; i < students.Count; i++)
+            foreach (Student s in students)
             {
-                StudentsList += (i + 1).ToString() + ": " +
-                    "ФИО: " + students[i].Surname + " " + students[i].Name + " " + students[i].Patronymic +
-                    " | Пол: " + ConvertSex(students[i].Sex).ToString() +
-                    " | Возраст: " + students[i].Age + "\n";
+                StudentsList += "ID: " + s.Id.ToString() + " | " +
+                    "ФИО: " + s.Surname.ToString() + " " + s.Name.ToString() + " " + s.Patronymic.ToString() +
+                    " | Пол: " + ConvertSex(s.Sex).ToString() +
+                    " | Возраст: " + s.Age.ToString() + "\n";
             }
             return StudentsList;
         }
@@ -55,11 +58,18 @@ namespace Lab1
             else { return "Ж"; }
         }
 
-        public string PrintNotesByNumber(int note_number, ref List<Student> students)
+        public string ConvertSex(string s)
+        {
+            if (s == "М" || s == "м") { return "true"; }
+            if(s == "Ж" || s == "ж") { return "false"; }
+            else { return ""; }
+        }
+
+        public string PrintNotesByNumber(int note_number, ref DbSet<Student> students)
         {
             try
             {
-                Student nstudent = students[note_number - 1];
+                Student nstudent = students.Find(note_number);
                 string student = "ФИО: " + nstudent.Surname + " "
                                 + nstudent.Name + " "
                                 + nstudent.Patronymic + " | "
@@ -70,6 +80,7 @@ namespace Lab1
             catch (Exception e) { return "Такой записи нет!\n"; }
         }
 
+        // так же не нужный метод из-за перехода на базу данных
         public string WriteNotesToFile(ref List<Student> students, string path)
         {
             using (StreamWriter sw = new StreamWriter(path, false))
@@ -84,27 +95,32 @@ namespace Lab1
             return "Даныне записаны в файл!\n";
         }
 
-        public string RemoveNotesFromFile(int note_number, ref List<Student> students)
+        public string RemoveNotesFromFile(int note_number)
         {
-            try
+            using (StudentContext db = new StudentContext())
             {
-                students.RemoveAt(note_number-1);
-                return "";
+                try
+                {
+                    db.Students.Remove(db.Students.Find(note_number));
+                    db.SaveChanges();
+                    return "";
+                }
+                catch (Exception e) { return "Записи с таким номром не существует!\n"; }
             }
-            catch (Exception e) { return "Записи с таким номром не существует!\n"; }
         }
 
-        public string AddNoteToFile(string surname, string name, string patronymic, string sex, int age, ref List<Student> students)
+        public string AddNoteToFile(string surname, string name, string patronymic, string sex, int age)
         {
-            bool tsex = true;
-            if (sex == "М" || sex == "м") { tsex = true; }
-            if (sex == "Ж" || sex == "ж") { tsex = false; } else { return "Форма заполнена не верно!\n"; }
-            try
+            using (StudentContext db = new StudentContext())
             {
-                students.Add(new Student(surname, name, patronymic, tsex, age));
-                return "";
+                try
+                {
+                    db.Students.Add(new Student(surname, name, patronymic, Convert.ToBoolean(ConvertSex(sex)), age));
+                    db.SaveChanges();
+                    return "";
+                }
+                catch (Exception e) { return "Форма заполнена не верно!\n"; }
             }
-            catch (Exception e) { return "Форма заполнена не верно!\n"; }
         }
     }
 }
