@@ -122,6 +122,11 @@ namespace Lab2_Server
                             string patronymic = p.message;
                             logger.Info($"Server got: {patronymic}");
 
+                            p.SendMessage("Enter group:");
+                            p.ReceiveMessage().Wait();
+                            string group = p.message;
+                            logger.Info($"Server got: {group}");
+
                             p.SendMessage("Enter sex:");
                             p.ReceiveMessage().Wait();
                             string sex = p.message;
@@ -129,11 +134,6 @@ namespace Lab2_Server
 
                             p.SendMessage("Enter age:");
                             p.ReceiveMessage().Wait();
-
-                            p.SendMessage("Enter group:");
-                            p.ReceiveMessage().Wait();
-                            string group = p.message;
-                            logger.Info($"Server got: {group}");
 
                             try
                             {

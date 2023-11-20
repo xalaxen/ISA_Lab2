@@ -28,7 +28,7 @@ namespace Lab1
                                                 tempNotes.Split(',')[2],
                                                 Convert.ToBoolean(tempNotes.Split(',')[3]),
                                                 Convert.ToInt32(tempNotes.Split(',')[4]),
-                                                tempNotes.Split(',')[5]));
+                                                Convert.ToInt32(tempNotes.Split(',')[5])));
                     }
                     catch (Exception ex)
                     {
@@ -43,13 +43,17 @@ namespace Lab1
         public string PrintAllNotes(ref DbSet<Student> students)
         {
             string StudentsList = "";
-            foreach (Student s in students)
+            using(StudentContext db = new StudentContext())
             {
-                StudentsList += "ID: " + s.Id.ToString() + " | " +
-                    "ФИО: " + s.Surname.ToString() + " " + s.Name.ToString() + " " + s.Patronymic.ToString() +
-                    " | Пол: " + ConvertSex(s.Sex).ToString() +
-                    " | Возраст: " + s.Age.ToString() + "\n";
+                foreach (Student s in students)
+                {
+                    StudentsList += "ID: " + s.Id.ToString() + " | " +
+                        "ФИО: " + s.Surname.ToString() + " " + s.Name.ToString() + " " + s.Patronymic.ToString() +
+                        " | Пол: " + ConvertSex(s.Sex).ToString() +
+                        " | Возраст: " + s.Age.ToString() + " | " + "Группа: " + db.Groups.Find(s.GroupId).Name + "\n";
+                }
             }
+            
             return StudentsList;
         }
 
@@ -71,11 +75,17 @@ namespace Lab1
             try
             {
                 Student nstudent = students.Find(note_number);
-                string student = "ФИО: " + nstudent.Surname + " "
+                string student;
+                using (StudentContext db = new StudentContext())
+                {
+                    student = "ФИО: " + nstudent.Surname + " "
                                 + nstudent.Name + " "
                                 + nstudent.Patronymic + " | "
                                 + "Пол: " + ConvertSex(nstudent.Sex) + " | "
-                                + "Возраст: " + nstudent.Age + "\n";
+                                + "Возраст: " + nstudent.Age + " | " 
+                                + "Группа: " + db.Groups.Find(nstudent.GroupId).Name + "\n";
+                }
+
                 return student;
             }
             catch (Exception e) { return "Такой записи нет!\n"; }
@@ -114,13 +124,23 @@ namespace Lab1
         {
             using (StudentContext db = new StudentContext())
             {
-                try
+                var r = db.Groups.Where(x => x.Name == group).ToList();
+                if (db.Groups.Where(x => x.Name == group) != null)
                 {
-                    db.Students.Add(new Student(surname, name, patronymic, Convert.ToBoolean(ConvertSex(sex)), age, group));
-                    db.SaveChanges();
-                    return "";
+                    var gId = db.Groups.Where(x => x.Name == group).ToList()[0].Id;
+                    try
+                    {
+                        db.Students.Add(new Student(surname, name, patronymic, Convert.ToBoolean(ConvertSex(sex)), age, gId));
+                        db.SaveChanges();
+                        return "";
+                    }
+                    catch (Exception e) { return "Форма заполнена не верно!\n"; }
                 }
-                catch (Exception e) { return "Форма заполнена не верно!\n"; }
+                else
+                {
+                    return "Такой группы не существует!";
+                }
+                return "";
             }
         }
     }
