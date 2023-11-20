@@ -27,7 +27,8 @@ namespace Lab1
                                                 tempNotes.Split(',')[1],
                                                 tempNotes.Split(',')[2],
                                                 Convert.ToBoolean(tempNotes.Split(',')[3]),
-                                                Convert.ToInt32(tempNotes.Split(',')[4])));
+                                                Convert.ToInt32(tempNotes.Split(',')[4]),
+                                                tempNotes.Split(',')[5]));
                     }
                     catch (Exception ex)
                     {
@@ -109,13 +110,13 @@ namespace Lab1
             }
         }
 
-        public string AddNoteToFile(string surname, string name, string patronymic, string sex, int age)
+        public string AddNoteToFile(string surname, string name, string patronymic, string sex, int age, string group)
         {
             using (StudentContext db = new StudentContext())
             {
                 try
                 {
-                    db.Students.Add(new Student(surname, name, patronymic, Convert.ToBoolean(ConvertSex(sex)), age));
+                    db.Students.Add(new Student(surname, name, patronymic, Convert.ToBoolean(ConvertSex(sex)), age, group));
                     db.SaveChanges();
                     return "";
                 }

@@ -15,16 +15,18 @@ namespace Lab1
         private string patronymic;
         private bool sex;
         private int age;
+        private string group;
 
         public Student() { }
 
-        public Student(string nsurname, string nname, string npatronymic, bool nsex, int nage)
+        public Student(string nsurname, string nname, string npatronymic, bool nsex, int nage, string ngroup)
         {
             Surname = nsurname;
             Name = nname;
             Patronymic = npatronymic;
             Sex = nsex;
             Age = nage;
+            Group = ngroup;
         }
 
         public string Surname
@@ -55,6 +57,12 @@ namespace Lab1
         {
             get { return age; }
             set { age = value; }
+        }
+
+        public string Group
+        {
+            get { return group; }
+            set { group = value; }
         }
     }
 }

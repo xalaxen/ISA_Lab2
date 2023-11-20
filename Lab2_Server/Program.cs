@@ -129,11 +129,17 @@ namespace Lab2_Server
 
                             p.SendMessage("Enter age:");
                             p.ReceiveMessage().Wait();
+
+                            p.SendMessage("Enter group:");
+                            p.ReceiveMessage().Wait();
+                            string group = p.message;
+                            logger.Info($"Server got: {group}");
+
                             try
                             {
                                 int age = Int32.Parse(p.message);
                                 logger.Info($"Server got: {age}");
-                                f.AddNoteToFile(surname, name, patronymic, sex, age);
+                                f.AddNoteToFile(surname, name, patronymic, sex, age, group);
                                 logger.Debug("New note added");
                                 p.SendMessage("Note added!" + "\n" + p.Menu());
                             }
